@@ -1,47 +1,25 @@
-<script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
-</script>
-
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-    </div>
-  </header>
-
-  <main>
-    <TheWelcome />
-  </main>
+  <Person/>
+  <Car/>
+  <Sum/>
+  <People :list="peopleList"/>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
-}
+<script setup lang="ts">
+import Person from "@/components/Person.vue";
+import Car from "@/components/Car.vue";
+import Sum from "@/components/Sum.vue";
+import {type PeopleList} from '@/types';
+import {reactive} from "vue";
+import People from "@/components/People.vue";
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
+defineOptions({
+  name: 'App',
+})
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-}
-</style>
+let peopleList = reactive<PeopleList>([
+  {id: 'qwq', name: '张三', age: 18},
+  {id: 'awa', name: '李四', age: 20},
+  {id: 'ava', name: '王五', age: 90},
+])
+</script>
