@@ -3,6 +3,7 @@
   <Car/>
   <Sum/>
   <People :list="peopleList"/>
+  <HooksDemo></HooksDemo>
 </template>
 
 <script setup lang="ts">
@@ -12,6 +13,7 @@ import Sum from "@/components/Sum.vue";
 import {type PeopleList} from '@/types';
 import {reactive} from "vue";
 import People from "@/components/People.vue";
+import HooksDemo from "@/components/HooksDemo.vue";
 
 defineOptions({
   name: 'App',
