@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</head>
+<body>
+<script>
+    function encrypt(text, key, iv) {
+        const keyHex = CryptoJS.enc.Hex.parse(key);
+        const ivHex = CryptoJS.enc.Hex.parse(iv);
+        const encrypted = CryptoJS.AES.encrypt(text, keyHex, {
+            iv: ivHex,
+            mode: CryptoJS.mode.CBC,
+            padding: CryptoJS.pad.Pkcs7
+        });
+        return encrypted.toString();
+    }
+
+    const key = '43656c65737469612d4145532d4b4559'; // 16 bytes key in hex
+    const iv = '43656c65737469612d4145532d495649'; // 16 bytes IV in hex
+    const text = 'Hello, Celestia!';
+
+    const encryptedText = encrypt(text, key, iv);
+    console.log('Encrypted Text:', encryptedText);
+</script>
+</body>
+</html>

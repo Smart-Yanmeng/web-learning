@@ -1,0 +1,3 @@
+# Project exclude paths
+/webpack-01/打包vue/dist/
+/webpack-01/项目管理文件/dist/
