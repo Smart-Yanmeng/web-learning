@@ -1,28 +1,42 @@
 <template>
-  <div class="tree-node">
-    <!-- 根据节点状态展示相应的内容 -->
-    <span v-if="node.type === 'leftBracket'">(</span>
-    <span v-if="node.type === 'rightBracket'">)</span>
-    <button v-if="node.type === 'button'" @click="handleButtonClick">按钮</button>
+  <div class="tree-layer">
+    <!-- 当前层节点 -->
+    <div class="tree-node">
+      <!-- 下拉选择框 -->
+      <select v-if="node.type === 'button'" v-model="selectedAction">
+        <option value="">请选择操作</option>
+        <option value="and">AND</option>
+        <option value="or">OR</option>
+        <option value="clear">清空子节点</option>
+      </select>
 
-    <!-- 子节点列表 -->
-    <div v-if="node.children.length > 0" class="children">
+      <!-- 左括号 -->
+      <span v-else-if="node.type === 'leftBracket'">(</span>
+
+      <!-- 右括号 -->
+      <span v-else-if="node.type === 'rightBracket'">)</span>
+
+      <!-- 添加按钮 -->
+<!--      <button v-if="node.type === 'button'" @click="generateChildren('button')">添加</button>-->
+    </div>
+
+    <!-- 递归渲染子节点 -->
+    <div v-if="node.children.length > 0" class="children-layer">
       <TreeNode
           v-for="(child, index) in node.children"
           :key="index"
           :node="child"
-          @updateTree="emitUpdateTree"
+          @removeChildNode="removeChildNode(index)"
       />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { defineComponent, ref, watch } from 'vue';
 
-// 定义节点的类型
 interface TreeNodeType {
-  type: 'button' | 'leftBracket' | 'rightBracket'; // 节点类型
+  type: 'button' | 'leftBracket' | 'rightBracket';
   children: TreeNodeType[];
 }
 
@@ -30,42 +44,85 @@ export default defineComponent({
   name: 'TreeNode',
   props: {
     node: {
-      type: Object as PropType<TreeNodeType>,
+      type: Object as () => TreeNodeType,
       required: true,
     },
   },
-  methods: {
-    // 按钮点击事件，生成五个子节点
-    handleButtonClick() {
-      if (this.node.type === 'button' && this.node.children.length === 0) {
-        this.node.children.push(
-            { type: 'button', children: [] },
-            { type: 'leftBracket', children: [] },
-            { type: 'button', children: [] },
-            { type: 'rightBracket', children: [] },
-            { type: 'button', children: [] }
-        );
-        this.emitUpdateTree(); // 通知父组件更新树结构
+  emits: ['removeChildNode'],
+  setup(props, { emit }) {
+    const selectedAction = ref('');
+
+    // 监听选项的变化
+    watch(selectedAction, (newValue) => {
+      if (newValue === 'and') {
+        generateChildren('AND');
+        selectedAction.value = ''; // 清空选择框
+      } else if (newValue === 'or') {
+        generateChildren('OR');
+        selectedAction.value = ''; // 清空选择框
+      } else if (newValue === 'clear') {
+        clearChildren();
+        selectedAction.value = ''; // 清空选择框
       }
-    },
-    emitUpdateTree() {
-      this.$emit('updateTree');
-    }
-  }
+    });
+
+    // 生成子节点（树枝）
+    const generateChildren = (operation: string) => {
+      if (props.node.children.length === 0) {
+        if (operation === 'AND' || operation === 'OR') {
+          // 生成: 操作选择框 ( 属性选择框 / 操作选择框 ) 操作选择框
+          props.node.children.push(
+              { type: 'button', children: [] }, // 第一个操作框
+              { type: 'leftBracket', children: [] }, // 左括号
+              { type: 'button', children: [] }, // 属性选择框/操作框
+              { type: 'rightBracket', children: [] }, // 右括号
+              { type: 'button', children: [] }  // 第二个操作框
+          );
+        }
+      }
+    };
+
+    // 清空当前节点下的所有子节点
+    const clearChildren = () => {
+      props.node.children = [];
+    };
+
+    // 删除子节点
+    const removeChildNode = (index: number) => {
+      props.node.children.splice(index, 1);
+    };
+
+    return {
+      selectedAction,
+      generateChildren,
+      clearChildren,
+      removeChildNode,
+    };
+  },
 });
 </script>
 
 <style scoped>
-.tree-node {
+.tree-layer {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: center; /* 居中对齐 */
 }
 
-.children {
+.tree-node {
   display: flex;
-  justify-content: center;
-  gap: 10px;
+  align-items: center;
+  justify-content: center; /* 居中对齐 */
+}
+
+.children-layer {
+  display: flex;
+  flex-direction: row;
+  justify-content: center; /* 子节点居中 */
   margin-top: 10px;
+}
+
+button {
+  margin: 5px;
 }
 </style>

@@ -3,13 +3,13 @@
     <!-- 渲染树的根节点 -->
     <TreeNode :node="rootNode" @updateTree="updateTree" />
 
-    <!-- 获取所有节点的按钮 -->
-    <button @click="getAllNodes">获取所有节点</button>
+    <!-- 获取叶子节点的按钮 -->
+    <button @click="getLeafNodes">获取叶子节点</button>
 
-    <!-- 显示获取到的节点信息 -->
+    <!-- 显示获取到的叶子节点信息 -->
     <div class="node-list">
-      <p v-for="(node, index) in allNodes" :key="index">
-        节点 {{ index + 1 }}: {{ node.type }}
+      <p v-for="(node, index) in leafNodes" :key="index">
+        叶子节点 {{ index + 1 }}: {{ node.type }}
       </p>
     </div>
   </div>
@@ -35,20 +35,25 @@ export default defineComponent({
       children: [],
     });
 
-    // 用于存储所有节点的列表
-    const allNodes = ref<TreeNodeType[]>([]);
+    // 用于存储所有叶子节点的列表
+    const leafNodes = ref<TreeNodeType[]>([]);
 
-    // 遍历整棵树，收集所有节点
-    const traverseTree = (node: TreeNodeType, nodes: TreeNodeType[]) => {
-      nodes.push(node); // 添加当前节点
-      node.children.forEach(child => traverseTree(child, nodes)); // 递归遍历子节点
+    // 遍历整棵树，收集叶子节点
+    const traverseTreeForLeaves = (node: TreeNodeType, leaves: TreeNodeType[]) => {
+      if (node.children.length === 0) {
+        // 如果没有子节点，则是叶子节点
+        leaves.push(node);
+      } else {
+        // 递归遍历子节点
+        node.children.forEach(child => traverseTreeForLeaves(child, leaves));
+      }
     };
 
-    // 获取所有节点
-    const getAllNodes = () => {
-      const nodes: TreeNodeType[] = [];
-      traverseTree(rootNode, nodes);
-      allNodes.value = nodes; // 更新allNodes
+    // 获取叶子节点
+    const getLeafNodes = () => {
+      const leaves: TreeNodeType[] = [];
+      traverseTreeForLeaves(rootNode, leaves);
+      leafNodes.value = leaves; // 更新叶子节点列表
     };
 
     const updateTree = () => {
@@ -57,8 +62,8 @@ export default defineComponent({
 
     return {
       rootNode,
-      getAllNodes,
-      allNodes,
+      getLeafNodes,
+      leafNodes,
       updateTree,
     };
   },
